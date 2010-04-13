@@ -16,6 +16,8 @@ class ActiveForm
   def []=(key, value)
     instance_variable_set("@#{key}", value)
   end
+
+  def to_key; id ? [id] : nil end
   
   def method_missing(method_id, *params)
     # Implement _before_type_cast accessors
@@ -24,6 +26,10 @@ class ActiveForm
       return self[attr_name] if self.respond_to?(attr_name)
     end
     super
+  end
+
+  def deprecated_callback_method(*args)
+    puts "deprecated_callback_method: #{args.inspect}"
   end
 
   def new_record?
@@ -49,7 +55,7 @@ class ActiveForm
   alias save! raise_not_implemented_error
   alias update_attribute raise_not_implemented_error
   alias update_attributes raise_not_implemented_error
-  
+
   class <<self
     def self_and_descendants_from_active_record
       [self]
@@ -60,7 +66,7 @@ class ActiveForm
     end
 
     def human_attribute_name(attribute_key_name)
-      attribute_key_name.humanize
+      attribute_key_name.to_s.humanize
     end
 
     def raise_not_implemented_error(*params)
@@ -75,5 +81,9 @@ class ActiveForm
     alias validates_on_create raise_not_implemented_error
     alias validates_on_update raise_not_implemented_error
     alias save_with_validation raise_not_implemented_error
+
+    def i18n_scope #:nodoc:
+      :activerecord
+    end
   end
 end
