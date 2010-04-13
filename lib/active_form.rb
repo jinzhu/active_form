@@ -65,8 +65,18 @@ class ActiveForm
       name.humanize
     end
 
-    def human_attribute_name(attribute_key_name)
-      attribute_key_name.to_s.humanize
+    def human_attribute_name(attribute, options = {})
+      begin
+        defaults = [:"#{self.i18n_scope}.attributes.#{self.to_s.underscore}.#{attribute}"]
+        defaults << :"attributes.#{attribute}"
+        defaults << options.delete(:default) if options[:default]
+        defaults << attribute.to_s.humanize
+
+        options.reverse_merge! :count => 1, :default => defaults
+        I18n.translate(defaults.shift, options)
+      rescue
+        attribute_key_name.to_s.humanize
+      end
     end
 
     def raise_not_implemented_error(*params)
